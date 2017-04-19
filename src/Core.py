@@ -7,44 +7,45 @@ import json
 import os.path
 
 #------------------------------------------------------------
+# each blob is a dictionary
 #------------------------------------------------------------
 class BUBlob:
-    def __init__(self, note = "", type = "word"):
-        self.note = note
-        self.type = type
+    def __init__(self, word = "", note = "", type = "word"):
+        self.blobDict = dict()
+        self.blobDict["word"] = word
+        self.blobDict["note"] = note
+        self.blobDict["type"] = type
 
     def Show(self):
-        print("    ", self.note)
-        print("    ", self.type)
+        for key, value in self.blobDict.items():
+            print("    ", key, ":", value)
 
 #------------------------------------------------------------
+# raw data is a list of blobs
 #------------------------------------------------------------
 class BUData:
     def __init__(self):
         self.dataPath = os.path.join(os.getcwd(), "data", "bubu.data")
-        self.rawData = dict()
+        self.rawData = list()
 
     #------------------------------------------------------------
     #------------------------------------------------------------
     def Show(self):
-        for key, value in self.rawData.items():
-            print("--> ", key)
-            value.Show()
+        for item in self.rawData:
+            print("-->")
+            item.Show()
 
 #------------------------------------------------------------
 #------------------------------------------------------------
 class BUEncoder(json.JSONEncoder):
     #------------------------------------------------------------
-    # obj is the value in each (key, value) pair of the dict data
+    # obj is a BUBlob in the list
     #------------------------------------------------------------
     def default(self, obj):
         if isinstance(obj, BUBlob):
-            serializable = [obj.note, obj.type]
-            return serializable
+            return obj.blobDict # return a dict, which is serializable
         else:
-            return json.JSONEncoder.default(self, obj)
-
-
+            sys.exit("BUEncoder(): wrong data.")
 
 #------------------------------------------------------------
 #------------------------------------------------------------
@@ -53,14 +54,12 @@ class BUDecoder(json.JSONDecoder):
         super().__init__(object_hook = self.BUDecodeMethod)
 
     #------------------------------------------------------------
-    # obj is the entire raw dict
+    # obj is a BUBlob in the list
     #------------------------------------------------------------
     def BUDecodeMethod(self, obj):
-        result = dict()
-        for key, value in obj.items():
-            result[key] = BUBlob(value[0], value[1])
+        result = BUBlob()
+        result.blobDict = obj
         return result
-
 
 #------------------------------------------------------------
 #------------------------------------------------------------
@@ -71,13 +70,21 @@ class BUCore:
     #------------------------------------------------------------
     #------------------------------------------------------------
     def ShowSystemInfo(self):
-        print("--> python\n    ", sys.version)
+        print("--> python version\n    ", sys.version)
 
     #------------------------------------------------------------
     #------------------------------------------------------------
     def WriteToFile(self):
-        self.buData.rawData["godspeed"] = BUBlob("a prosperous journey", "word")
-        self.buData.rawData["lug"] = BUBlob("drag or carry sth with great effort", "word")
+        # cls specifies user-defined JSONEncoder subclass
+        with open(self.buData.dataPath, 'w') as outfile:
+            json.dump(self.buData.rawData, outfile, sort_keys=True, indent=4, cls=BUEncoder)
+
+    #------------------------------------------------------------
+    #------------------------------------------------------------
+    def WriteTestToFile(self):
+        self.buData.rawData.append(BUBlob("godspeed", "a prosperous journey", "word"))
+        self.buData.rawData.append(BUBlob("godspeed", "a prosperous journey", "word"))
+        self.buData.rawData.append(BUBlob("lug", "drag or carry sth with great effort", "word"))
 
         # cls specifies user-defined JSONEncoder subclass
         with open(self.buData.dataPath, 'w') as outfile:
@@ -91,7 +98,7 @@ class BUCore:
                 # cls specifies user-defined JSONDecoder subclass
                 self.buData.rawData = json.load(infile, cls=BUDecoder)
         else:
-            sys.exit("--> " + self.buData.dataPath + " does not exist.")
+            print("--> warning: " + self.buData.dataPath + " does not exist and will be created.")
 
     #------------------------------------------------------------
     #------------------------------------------------------------

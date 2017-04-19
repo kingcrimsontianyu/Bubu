@@ -40,6 +40,8 @@ class BUgui:
         self.m_data.pictureDir = os.path.join(self.m_data.dataDir, "pic")
 
         self.m_data.mainWindow = BUMainWindow(self.m_data)
+
+        self.m_data.core.ShowSystemInfo()
         self.ShowSystemInfo()
 
     #------------------------------------------------------------
@@ -51,7 +53,7 @@ class BUgui:
     #------------------------------------------------------------
     #------------------------------------------------------------
     def ShowSystemInfo(self):
-        print("--> pyside\n    ", PySide.__version__)
+        print("--> pyside version\n    ", PySide.__version__)
 
     #++++++++++++++++++++++++++++++
     #++++++++++++++++++++++++++++++

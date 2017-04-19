@@ -10,16 +10,12 @@ from ScrollArea import BUScrollArea
 from Table import BUTableWidget
 from Table import BUTableWidgetItem
 from Tree import BUTreeWidget
+import Core
 
 #------------------------------------------------------------
 #------------------------------------------------------------
 class BUMainWindow(QtGui.QMainWindow):
     #++++++++++++++++++++++++++++++
-    # widget embedding:
-    # central widget
-    # widget
-    # vbox
-    # topFiller, bottomFiller, etc
     #++++++++++++++++++++++++++++++
     def __init__(self, guiData):
         super().__init__()
@@ -39,7 +35,7 @@ class BUMainWindow(QtGui.QMainWindow):
     def Initialize(self):
         self.setWindowTitle("bubu")
         self.setMinimumSize(320,320)
-        self.resize(800,640)
+        self.resize(1200,640)
         self.setWindowIcon(QtGui.QIcon(os.path.join(self.m_data.pictureDir, 'bubu.png')))
 
         hbox = QtGui.QHBoxLayout()
@@ -65,9 +61,9 @@ class BUMainWindow(QtGui.QMainWindow):
         self.m_table.setCornerButtonEnabled(False)
 
         counter = 0
-        for key in self.m_raw.keys():
+        for entry in self.m_raw:
             item = BUTableWidgetItem()
-            item.setText(key)
+            item.setText(entry.blobDict["word"])
             item.setFlags(~QtCore.Qt.ItemIsEditable)
             self.m_table.setItem(counter, 0, item)
             counter += 1
@@ -98,24 +94,24 @@ class BUMainWindow(QtGui.QMainWindow):
     #------------------------------------------------------------
     def Delegate(self):
         self.m_table.cellClicked.connect(self.ChangeText)
-        # self.m_button_add.clicked
+        self.m_button_add.clicked.connect(self.AddTableItem)
         # self.m_button_save.clicked
         self.m_button_exit.clicked.connect(self.Quit)
 
-
-    #++++++++++++++++++++++++++++++
-    #++++++++++++++++++++++++++++++
+    #------------------------------------------------------------
+    #------------------------------------------------------------
     def ChangeText(self, row, column):
-        key = self.m_table.item(row, column).text()
-        result = self.m_raw[key]
-        self.m_text.setText(result.note)
+        entry = self.m_raw[row]
+        self.m_text.setText(entry.blobDict["note"])
 
-    #++++++++++++++++++++++++++++++
-    #++++++++++++++++++++++++++++++
-    def Add(self):
-        self.m_data.app.quit()
+    #------------------------------------------------------------
+    #------------------------------------------------------------
+    def AddTableItem(self):
+        blob = Core.BUBlob("", "", "word")
+        self.m_raw.insert(0, blob)
+        self.m_table.insertRow(0)
 
-    #++++++++++++++++++++++++++++++
-    #++++++++++++++++++++++++++++++
+    #------------------------------------------------------------
+    #------------------------------------------------------------
     def Quit(self):
         self.m_data.app.quit()
