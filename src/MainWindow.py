@@ -100,11 +100,12 @@ class BUMainWindow(QtGui.QMainWindow):
     #------------------------------------------------------------
     def Delegate(self):
         self.m_table.cellClicked.connect(self.ShowText)
+        self.m_table.itemChanged.connect(self.SaveChangedTableToMemory)
         self.m_button_add.clicked.connect(self.AddTableItem)
         self.m_button_save.clicked.connect(self.SaveToDisk)
         self.m_button_exit.clicked.connect(self.Quit)
         self.m_button_sort.clicked.connect(self.Sort)
-        self.m_text.textChanged.connect(self.SaveToMemoryIfChanged)
+        self.m_text.textChanged.connect(self.SaveChangedTextToMemory)
 
     #------------------------------------------------------------
     #------------------------------------------------------------
@@ -141,13 +142,25 @@ class BUMainWindow(QtGui.QMainWindow):
 
     #------------------------------------------------------------
     #------------------------------------------------------------
-    def SaveToMemoryIfChanged(self):
-        # the data are considered user-changed if
+    def SaveChangedTableToMemory(self):
+        p = self.m_table.item(self.m_data.currentRow, 0)
+        newText = p.text()
+        self.m_raw[self.m_data.currentRow].blobDict["word"] = newText
+        print("--> table changed.", newText, "current row: ", self.m_data.currentRow)
+
+        self.m_data.anyThingChanged = True
+        self.m_button_save.setEnabled(True)
+
+    #------------------------------------------------------------
+    #------------------------------------------------------------
+    def SaveChangedTextToMemory(self):
+        # the text data are considered user-changed if
         # --- m_text has focus
         # --- m_text content has been changed
         if self.m_text.hasFocus():
-            print("--> text changed.", self.m_text.toPlainText())
-            self.m_raw[self.m_data.currentRow].blobDict["note"] = self.m_text.toPlainText()
+            newText = self.m_text.toPlainText()
+            self.m_raw[self.m_data.currentRow].blobDict["note"] = newText
+            print("--> text changed.", newText)
 
             self.m_data.anyThingChanged = True
             self.m_button_save.setEnabled(True)
@@ -156,7 +169,7 @@ class BUMainWindow(QtGui.QMainWindow):
     #------------------------------------------------------------
     def Quit(self):
         if self.m_data.anyThingChanged:
-            print("things changed")
+            print("exit without saving.")
         else:
             self.m_data.app.quit()
 
@@ -166,13 +179,14 @@ class BUMainWindow(QtGui.QMainWindow):
         # sort raw data
         self.m_raw.sort(key=lambda x: x.blobDict["word"])
 
-        # update table and text
+        # update table
         counter = 0
         for entry in self.m_raw:
             item = self.m_table.item(counter, 0)
             item.setText(entry.blobDict["word"])
             counter += 1
 
+        # update text
         if len(self.m_raw) != 0:
             self.m_text.setPlainText(self.m_raw[0].blobDict["note"])
 
