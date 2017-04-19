@@ -15,14 +15,17 @@ class BUPushButton(QtGui.QPushButton):
         # css
         self.css = "QPushButton {padding: 5px;"\
                                 "text-align:left;"\
-                                "background-color: #3399ff;"\
+                                "background-color: #66b2ff;"\
                                  "color: white;"\
                                  "border: none;"\
                                  "font-size: 20px;"\
                                  "font-weight: bold;"\
                                  "font-family: Century Gothic, sans-serif}"\
                                  "QPushButton:pressed {"\
-                                 "background-color: #66b2ff;}"
+                                 "background-color: #99ccff;}"\
+                    "QPushButton:disabled {"\
+                                 "background-color: #ffffff;"\
+                                 "color: #000000;}"
 
         self.setStyleSheet(self.css)
 

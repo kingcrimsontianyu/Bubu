@@ -19,6 +19,10 @@ class BUguiData:
         self.pictureDir       = None
         self.core             = core
 
+        # status data
+        self.currentRow       = 0
+        self.anyThingChanged  = False
+
     #++++++++++++++++++++++++++++++
     #++++++++++++++++++++++++++++++
     def GetRawData(self):

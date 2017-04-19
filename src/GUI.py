@@ -33,6 +33,7 @@ class BUgui:
         self.m_data.fontData = QtGui.QFontDatabase()
         for file in os.listdir(self.m_data.fontDir):
             if file.endswith(".ttf"):
+                print(os.path.join(self.m_data.fontDir, file))
                 self.m_data.fontData.addApplicationFont(os.path.join(self.m_data.fontDir, file))
         #******************************
         # picture
@@ -54,6 +55,9 @@ class BUgui:
     #------------------------------------------------------------
     def ShowSystemInfo(self):
         print("--> pyside version\n    ", PySide.__version__)
+
+        temp = QtGui.QFontDatabase()
+        print("--> system font families\n", temp.families())
 
     #++++++++++++++++++++++++++++++
     #++++++++++++++++++++++++++++++
