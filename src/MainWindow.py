@@ -45,12 +45,10 @@ class BUMainWindow(QtGui.QMainWindow):
         self.m_button_save = BUPushButton("save")
         self.m_button_save.setEnabled(False)
         self.m_button_backup = BUPushButton("back up")
-        self.m_button_exit = BUPushButton("exit")
         hbox.addWidget(self.m_button_add)
         hbox.addWidget(self.m_button_sort)
         hbox.addWidget(self.m_button_save)
         hbox.addWidget(self.m_button_backup)
-        hbox.addWidget(self.m_button_exit)
         buttonWidget = QtGui.QWidget()
         buttonWidget.setLayout(hbox)
 
@@ -63,6 +61,7 @@ class BUMainWindow(QtGui.QMainWindow):
         # self.m_table.verticalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.m_table.setColumnWidth(0, 10)
         self.m_table.setCornerButtonEnabled(False)
+        self.m_table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
         counter = 0
         for entry in self.m_raw:
@@ -101,11 +100,24 @@ class BUMainWindow(QtGui.QMainWindow):
     def Delegate(self):
         self.m_table.cellClicked.connect(self.ShowText)
         self.m_table.itemChanged.connect(self.SaveChangedTableToMemory)
+        self.m_table.customContextMenuRequested.connect(self.RemoveTableItem)
         self.m_button_add.clicked.connect(self.AddTableItem)
         self.m_button_save.clicked.connect(self.SaveToDisk)
-        self.m_button_exit.clicked.connect(self.Quit)
         self.m_button_sort.clicked.connect(self.Sort)
         self.m_text.textChanged.connect(self.SaveChangedTextToMemory)
+
+    #------------------------------------------------------------
+    # right click automatically triggers cellClicked
+    #------------------------------------------------------------
+    def RemoveTableItem(self, position):
+        menu = QtGui.QMenu()
+        rmAction = menu.addAction("remove")
+        action = menu.exec_(self.m_table.mapToGlobal(position))
+        if action == rmAction:
+            self.m_raw.pop(self.m_data.currentRow)
+            self.m_table.removeRow(self.m_data.currentRow)
+            self.m_data.anyThingChanged = True
+            self.m_button_save.setEnabled(True)
 
     #------------------------------------------------------------
     #------------------------------------------------------------
@@ -132,9 +144,6 @@ class BUMainWindow(QtGui.QMainWindow):
     #------------------------------------------------------------
     def SaveToDisk(self):
         self.m_data.core.WriteToFile()
-        msg = BUMessageBox(self.m_data)
-        msg.setText("The data have been saved.")
-        msg.exec_()
 
         # reset
         self.m_data.anyThingChanged = False
@@ -167,11 +176,28 @@ class BUMainWindow(QtGui.QMainWindow):
 
     #------------------------------------------------------------
     #------------------------------------------------------------
-    def Quit(self):
+    def closeEvent(self, event):
+        print("--> closeEvent()")
         if self.m_data.anyThingChanged:
-            print("exit without saving.")
+            msgBox = BUMessageBox(self.m_data)
+            msgBox.setText("about to exit")
+            msgBox.setInformativeText("Unsaved work. What now?")
+            msgBox.setStandardButtons(QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard | QtGui.QMessageBox.Cancel)
+            msgBox.setDefaultButton(QtGui.QMessageBox.Save)
+            ret = msgBox.exec_()
+
+            if ret == QtGui.QMessageBox.Save:
+                self.SaveToDisk()
+                super().closeEvent(event)
+            elif ret == QtGui.QMessageBox.Discard:
+                super().closeEvent(event)
+            elif ret == QtGui.QMessageBox.Cancel:
+                msgBox.close()
+                event.ignore()
+            else:
+                pass
         else:
-            self.m_data.app.quit()
+            super().closeEvent(event)
 
     #------------------------------------------------------------
     #------------------------------------------------------------
