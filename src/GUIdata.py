@@ -20,7 +20,6 @@ class BUguiData:
         self.core             = core
 
         # status data
-        self.currentRow       = 0
         self.anyThingChanged  = False
 
     #++++++++++++++++++++++++++++++

@@ -12,6 +12,13 @@ class BUTableWidget(QtGui.QTableWidget):
     def __init__(self):
         super().__init__()
 
+        self.lastRow = 0
+        self.lastCol = 0
+        self.currentRow = 0
+        self.currentCol= 0
+        self.unselectedColor = "#66ffb2"
+        self.selectedColor = "#ff9999"
+
         # css
         self.css = "QTableWidget {background-color: #323232;"\
                                 "color: #66ffb2;"\
@@ -29,6 +36,7 @@ class BUTableWidget(QtGui.QTableWidget):
                                 "font-family: Century Gothic, sans-serif}"
 
         self.setStyleSheet(self.css)
+
 
 #------------------------------------------------------------
 # css style sheet does not apply

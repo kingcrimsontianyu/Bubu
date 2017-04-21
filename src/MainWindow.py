@@ -98,7 +98,7 @@ class BUMainWindow(QtGui.QMainWindow):
     #------------------------------------------------------------
     #------------------------------------------------------------
     def Delegate(self):
-        self.m_table.cellClicked.connect(self.ShowText)
+        self.m_table.cellClicked.connect(self.HandleCellClicked)
         self.m_table.itemChanged.connect(self.SaveChangedTableToMemory)
         self.m_table.customContextMenuRequested.connect(self.RemoveTableItem)
         self.m_button_add.clicked.connect(self.AddTableItem)
@@ -114,17 +114,29 @@ class BUMainWindow(QtGui.QMainWindow):
         rmAction = menu.addAction("remove")
         action = menu.exec_(self.m_table.mapToGlobal(position))
         if action == rmAction:
-            self.m_raw.pop(self.m_data.currentRow)
-            self.m_table.removeRow(self.m_data.currentRow)
+            self.m_raw.pop(self.m_table.currentRow)
+            self.m_table.removeRow(self.m_table.currentRow)
             self.m_data.anyThingChanged = True
             self.m_button_save.setEnabled(True)
 
     #------------------------------------------------------------
     #------------------------------------------------------------
-    def ShowText(self, row, column):
-        self.m_data.currentRow = row
-        entry = self.m_raw[self.m_data.currentRow]
+    def HandleCellClicked(self, row, column):
+        self.m_table.currentRow = row
+        entry = self.m_raw[self.m_table.currentRow]
         self.m_text.setPlainText(entry.blobDict["note"])
+
+        # change color
+        # this will trigger itemChanged() signal
+        p = self.m_table.item(self.m_table.lastRow, 0)
+        p.setForeground(QtGui.QBrush(QtGui.QColor(self.m_table.unselectedColor)))
+
+        # change color
+        # this will trigger itemChanged() signal
+        p = self.m_table.item(self.m_table.currentRow, 0)
+        p.setForeground(QtGui.QBrush(QtGui.QColor(self.m_table.selectedColor)))
+
+        self.m_table.lastRow = self.m_table.currentRow
 
     #------------------------------------------------------------
     #------------------------------------------------------------
@@ -152,13 +164,14 @@ class BUMainWindow(QtGui.QMainWindow):
     #------------------------------------------------------------
     #------------------------------------------------------------
     def SaveChangedTableToMemory(self):
-        p = self.m_table.item(self.m_data.currentRow, 0)
+        p = self.m_table.item(self.m_table.currentRow, 0)
         newText = p.text()
-        self.m_raw[self.m_data.currentRow].blobDict["word"] = newText
-        print("--> table changed.", newText, "current row: ", self.m_data.currentRow)
+        self.m_raw[self.m_table.currentRow].blobDict["word"] = newText
+        print("--> table changed.", newText, " current row: ", self.m_table.currentRow)
 
         self.m_data.anyThingChanged = True
         self.m_button_save.setEnabled(True)
+
 
     #------------------------------------------------------------
     #------------------------------------------------------------
@@ -168,7 +181,7 @@ class BUMainWindow(QtGui.QMainWindow):
         # --- m_text content has been changed
         if self.m_text.hasFocus():
             newText = self.m_text.toPlainText()
-            self.m_raw[self.m_data.currentRow].blobDict["note"] = newText
+            self.m_raw[self.m_table.currentRow].blobDict["note"] = newText
             print("--> text changed.", newText)
 
             self.m_data.anyThingChanged = True
