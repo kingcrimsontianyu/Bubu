@@ -29,16 +29,21 @@ class BUgui:
         #******************************
         self.m_data.rootDir = os.getcwd()
         self.m_data.dataDir = os.path.join(self.m_data.rootDir, "data")
+        if ~os.path.exists(self.m_data.dataDir):
+            os.mkdir(self.m_data.dataDir)
         self.m_data.fontDir = os.path.join(self.m_data.dataDir, "font", "CenturyGothic")
         self.m_data.fontData = QtGui.QFontDatabase()
-        for file in os.listdir(self.m_data.fontDir):
-            if file.endswith(".ttf"):
-                print(os.path.join(self.m_data.fontDir, file))
-                self.m_data.fontData.addApplicationFont(os.path.join(self.m_data.fontDir, file))
+        if os.path.exists(self.m_data.fontDir):
+            for file in os.listdir(self.m_data.fontDir):
+                if file.endswith(".ttf"):
+                    print(os.path.join(self.m_data.fontDir, file))
+                    self.m_data.fontData.addApplicationFont(os.path.join(self.m_data.fontDir, file))
         #******************************
         # picture
         #******************************
-        self.m_data.pictureDir = os.path.join(self.m_data.dataDir, "pic")
+        self.m_data.pictureDir = ""
+        if os.path.exists(self.m_data.dataDir):
+            self.m_data.pictureDir = os.path.join(self.m_data.dataDir, "pic")
 
         self.m_data.mainWindow = BUMainWindow(self.m_data)
 
