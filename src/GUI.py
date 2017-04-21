@@ -29,7 +29,7 @@ class BUgui:
         #******************************
         self.m_data.rootDir = os.getcwd()
         self.m_data.dataDir = os.path.join(self.m_data.rootDir, "data")
-        if ~os.path.exists(self.m_data.dataDir):
+        if not os.path.exists(self.m_data.dataDir):
             os.mkdir(self.m_data.dataDir)
         self.m_data.fontDir = os.path.join(self.m_data.dataDir, "font", "CenturyGothic")
         self.m_data.fontData = QtGui.QFontDatabase()
